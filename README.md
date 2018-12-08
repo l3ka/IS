@@ -1,2 +1,3 @@
 # IS
-Projektni zadatak iz Informacionih sistema
+
+Projektni za predmet informacioni sistemi.
