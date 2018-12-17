@@ -1,0 +1,256 @@
+{% extends 'guest/base.html' %}
+
+{% load static %}
+
+{% block content %}
+<!-- start banner Area -->
+<section class="banner-area relative" id="home">
+    <div class="container">
+        <div class="row fullscreen d-flex align-items-center justify-content-start">
+            <div class="banner-content col-lg-8 col-md-12">
+                <h4 class="text-white text-uppercase">Širok izbor jela i pića</h4>
+                <h1>
+                    Ukusni recepti
+                </h1>
+                <p class="text-white">
+                    Restoran “{{ base_props.restaurant }}” koristi najkvalitetnije sastojke od domaćih proizvođača.
+                    Znanje, inovativnost i iskustvo u kombinovanju različitih kuhinja i stilova je naša
+                    najveća prednost. Koncept jelovnika je spajanje kontinentalne i mediteranske gastronomije.
+                    Pored jednostavnih, ukusnih i sa ljubavlju spremljenih jela, posebno smo ponosni na uvijek
+                    sviježe pecivo iz naše radionice, kao i na sviježu, ne sušenu domaću tjesteninu pravljenu po
+                    posebnim recepturama. Pojedina crvena mesa, poput ramsteka i bifteka su sazrela u našim komorama,
+                    a zatim termički obrađena, sporim u dugim procesom (slow coocking), kako bismo sačuvali sve
+                    prirodne okuse jela. Bar restorana “{{ base_props.restaurant }}” ima bogatu vinsku kartu koju čini
+                    preko
+                    pedeset probranih vrsta vina, a riječ je o najkvalitetnijim podrumima i proizvođačima vina.
+                    Tu su vina iz regije, zatim vina mediteranskih zemalja, Italije, Španije, Francuske, kao i
+                    vina iz zemalja trećeg svijeta Australije, Čilea, Argentine. Selekciju i pomoć pri izboru hrane
+                    i vina prepustite našem stručnom osoblju. </p>
+                <a href="{% url 'guest-menu' %}" class="primary-btn header-btn text-uppercase">Pogledajte naš meni</a>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End banner Area -->
+
+<!-- Start top-dish Area -->
+<section class="top-dish-area section-gap">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="menu-content pb-60 col-lg-8">
+                <div class="title text-center">
+                    <h1 class="mb-10">Naša najbolje ocjenjena jela</h1>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            {% for dish in dishes %}
+            <div class="single-dish col-lg-4">
+                <div class="thumb">
+                    <img class="img-fluid" src="{% static dish.img_url %}" alt="">
+                </div>
+                <h4 class="text-uppercase pt-20 pb-20">{{ dish.name }}</h4>
+                <p>
+                    {{ dish.description }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- End top-dish Area -->
+
+<!-- Start video Area -->
+<section class="video-area">
+    <div class="container">
+        <div class="row justify-content-center align-items-center flex-column">
+            <a class="play-btn" href="https://www.youtube.com/watch?v=daDGzysYO-s">
+                <img src="{% static 'img/play-btn.png' %}" alt="">
+            </a>
+            <h3 class="pt-20 pb-20 text-white">Uvijek uslužujemo samo najbolju hranu sa svježim sastojcima u ugodnom
+                ambijentu.</h3>
+            <p class="text-white">Youtube video će se pojaviti u prozoru.</p>
+        </div>
+    </div>
+</section>
+<!-- End video Area -->
+
+
+<!-- Start features Area -->
+<section class="features-area pt-100" id="feature">
+    <div class="container">
+        <div class="feature-section">
+            <div class="row">
+                <div class="single-feature col-lg-3 col-md-6">
+                    <img src="{% static 'img/f1.png' %}" alt="">
+                    <h4 class="pt-20 pb-20">Osvježavajuć doručak</h4>
+                    <p>
+                        Svako zna da dobar dan počinje dobrim doručkom.
+                    </p>
+                </div>
+                <div class="single-feature col-lg-3 col-md-6">
+                    <img src="{% static 'img/f2.png' %}" alt="">
+                    <h4 class="pt-20 pb-20">Fenomenalan ručak</h4>
+                    <p>
+                        Uživajte u pauzi od posla u najboljoj hrani grada.
+                    </p>
+                </div>
+                <div class="single-feature col-lg-3 col-md-6">
+                    <img src="{% static 'img/f3.png' %}" alt="">
+                    <h4 class="pt-20 pb-20">Opuštajuća večera</h4>
+                    <p>
+                        Zar postoji bolji način da se završi dan, nego uz ugodnu večeru i prijatan ambijent?
+                    </p>
+                </div>
+                <div class="single-feature col-lg-3 col-md-6">
+                    <img src="{% static 'img/f4.png' %}" alt="">
+                    <h4 class="pt-20 pb-20">Veliki izbor hrane</h4>
+                    <p>
+                        Ogroman izbor raznih jela i specijeliteta vrhunskog kvaliteta.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End features Area -->
+
+
+<!-- Start related Area -->
+<section class="related-area section-gap" id="dish">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="menu-content pb-60 col-lg-8">
+                <div class="title text-center">
+                    <h1 class="mb-10">Izdvojena jela</h1>
+                    <p>Preporučena od strane kuvara</p>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="active-realated-carusel">
+                {% for recommended_dish in recommended_dishes %}
+                <div class="item row align-items-center">
+                    <div class="col-lg-6 rel-left">
+                        <h3>
+                            {{ recommended_dish.name }}
+                        </h3>
+                        <p class="pt-30 pb-30">
+                            {{ recommended_dish.description }}
+                        </p>
+                        <a href="{% url 'guest-menu' %}" class="primary-btn header-btn text-uppercase">Pogledaj čitav meni</a>
+                    </div>
+                    <div class="col-lg-6">
+                        <img class="img-fluid" src="{% static recommended_dish.img_url %}" alt="">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End related Area -->
+
+<!-- Start related Area -->
+<section class="related-area section-gap" id="drinks">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="menu-content pb-60 col-lg-8">
+                <div class="title text-center">
+                    <h1 class="mb-10">Izdvojena pića</h1>
+                    <p>Preporučena od strane šankera i pažljivo izabrana da za svaku prigode svakoj prilici</p>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="active-realated-carusel">
+                {% for recommended_drink in recommended_drinks %}
+                <div class="item row align-items-center">
+                    <div class="col-lg-6 rel-left">
+                        <h3>
+                            {{ recommended_drink.name }}
+                        </h3>
+                        <p class="pt-30 pb-30">
+                            {{ recommended_drink.description }}
+                        </p>
+                        <a href="{% url 'guest-menu' %}" class="primary-btn header-btn text-uppercase">Pogledaj čitav meni</a>
+                    </div>
+                    <div class="col-lg-6">
+                        <img class="img-fluid" src="{% static recommended_drink.img_url %}" style="width:555px; height:400px"
+                            alt="">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End related Area -->
+
+<!-- Start team Area -->
+<section class="team-area section-gap" id="staff">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="menu-content pb-70 col-lg-8">
+                <div class="title text-center">
+                    <h1 class="mb-10">Upoznajte se sa našim osobljem</h1>
+                    <p>Uvijek spremni da pomognu i usluže</p>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center d-flex align-items-center">
+            {% for staff_member in staff %}
+            <div class="col-md-3 single-team">
+                <div class="thumb">
+                    <img class="img-fluid" src="{% static staff_member.profile_pic %}" alt="">
+                    <div class="align-items-center justify-content-center d-flex">
+                        <a href="#"><i class="fa fa-facebook"></i></a>
+                        <a href="#"><i class="fa fa-twitter"></i></a>
+                        <a href="#"><i class="fa fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="meta-text mt-30 text-center">
+                    <h4>{{ staff_member.name }}</h4>
+                    <p>{{ staff_member.job_description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- End team Area -->
+
+<!-- start blog Area -->
+<section class="blog-area section-gap" id="impressions">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="menu-content pb-70 col-lg-8">
+                <div class="title text-center">
+                    <h1 class="mb-10">Dojmovi</h1>
+                    <p>Ne morate nama vjerovati na riječ koliko smo dobri, samo poslušajte neke od naših divnih
+                        mušterija.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            {% for impression in impressions %}
+            <div class="col-lg-3 col-md-6 single-blog">
+                <p class="date">{{ impression.date }}</p>
+                <a href="#">
+                    <h4>{{ impression.title }}</h4>
+                </a>
+                <p>
+                    {{ impression.content }}
+                </p>
+                <div class="meta-bottom d-flex justify-content-between">
+                    <p><span class="lnr lnr-heart"></span> {{ impression.likes }} Lajkova</p>
+                    <p><span class="lnr lnr-bubble"></span> {{ impression.comments }} Komentara</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- end blog Area -->
+
+{% endblock content %}

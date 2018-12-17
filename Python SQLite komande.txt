@@ -1,0 +1,35 @@
+python manage.py makemigrations
+
+# python manage.py makemigrations [APP_NAME]
+python manage.py makemigrations users
+
+python manage.py migrate
+
+python manage.py runserver localhost:8000
+
+python manage.py createsuperuser
+
+
+# dodavanje u bazu podataka
+python manage.py shell
+	OR
+python manage.py dbshell
+
+
+
+PRAGMA table_info(table_name);
+	npr
+pragma table_info(users_konobar)
+pragma table_info(users_korisnickinalog)
+
+
+
+Admin:
+username: admin
+password: restoran
+
+
+
+# za projekat potrebno:
+1. conda install pillow
+2. 

@@ -1,3 +1,3 @@
 # IS
 
-Projektni za predmet informacioni sistemi.
+Projektni za predmet Informacioni sistemi.

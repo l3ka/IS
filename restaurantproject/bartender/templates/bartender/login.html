@@ -1,0 +1,72 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en-us">
+
+<head>
+    <title>{{ base_props.restaurant }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css">
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/login.css">
+
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/responsive.css">
+
+    <meta name="robots" content="NONE,NOARCHIVE">
+</head>
+
+<body class="login" style="background-color:#f7f3dc">
+
+    <!-- Container -->
+    <div id="container" class="row fullscreen d-flex align-items-center justify-content-start" style="height: 310px;">
+        <div class="banner-content col-lg-8 col-md-12">
+
+            <!-- Header -->
+            <div id="header" style="background-color: #f42f2c">
+                <div id="branding">
+
+                    <h1 id="site-name"><a href="/bartender/login">Prijava na sistem</a></h1>
+
+                </div>
+
+            </div>
+            <!-- END Header -->
+
+            <!-- Content -->
+            <div id="content" class="colM">
+
+                <div id="content-main">
+
+                    <form method="post" id="login-form"><input type="hidden" name="csrfmiddlewaretoken"
+                            value="MhpofLxGFgij1nBzsqARswIY6AIARWibjvXQwXmOFaQEz84MrqhFpIB0Cv3GUOH9">
+                            {% csrf_token %}
+                        <div class="form-row">
+
+                            <label class="required" for="id_username">Korisničko ime:</label>
+                            <input type="text" name="username" autofocus required id="id_username">
+                        </div>
+                        <div class="form-row">
+
+                            <label class="required" for="id_password">Šifra:</label>
+                            <input type="password" name="password" required id="id_password">
+                        </div>
+
+                        <div class="submit-row">
+                            <label>&nbsp;</label><input type="submit" style="background-color: #f42f2c" value="Prijavi se">
+                        </div>
+                    </form>
+
+                </div>
+
+                <br class="clear">
+            </div>
+            <!-- END Content -->
+
+            <div id="footer"></div>
+        </div>
+    </div>
+    <!-- END Container -->
+
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+
+{% extends 'bartender/base.html' %}
+
+{% load static %}
+
+{% block content %}
+<!-- {% if user.is_authenticated %} -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous">
+
+<!-- ako ukljucis ovo, onda se expanda jednom dobro i vise ne moze zatvoriti jer ga opet otvori ??? -->
+<!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script> -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+
+<style>
+    p {
+        color: #777
+    }
+    b { 
+        color: white
+    }
+
+</style>
+
+<div style="margin-top: 60px;margin-left: 60px;margin-right: 60px;">
+    <table class="table table-striped table-hover" style="overflow-x:auto">
+        <thead class="thead-dark">
+            <tr align="center" style="border-left: solid #212529 20px; border-right: solid #212529 20px;">
+                <th scope="col">Broj stola</th>
+                <th scope="col">Vrijeme narudžbe</th>
+                <th scope="col">Cijena</th>
+                <th scope="col">&nbsp;</th>
+                <th scope="col">&nbsp;</th>
+                <th scope="col">&nbsp;</th>
+                <th scope="col">&nbsp;</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for order in orders %}
+
+            <tr align="center" style="align-items: center">
+                <td>{{ order.table_number }}</td>
+                <td>{{ order.time_ordered }}</td>
+                <td>{{ order.price_together }} KM</td>
+
+                <td><button type="button" id="btn-reject-{{order.id}}" class="btn btn-outline-danger btn-sm" onclick="console.log('Odbij')">Odbij</button></td>
+                <td><button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('btn-reject-{{order.id}}').disabled=true">Prihvati</button></td>
+                <td><button type="button" class="btn btn-outline-primary btn-sm">Narudžba gotova</button></td>
+                <td><button type="button" data-toggle="collapse" data-target=".collapse-{{ order.id }}" class="btn btn-outline-info btn-sm">Detalji</button></td>
+            </tr>
+
+            <div class="colapsed_class">
+
+                <tr align="center" class="collapse collapse-{{ order.id }}" style="background:#212529">
+                    <th scope="col" style="color: white">&nbsp;</td>
+                    <th scope="col"><b>Naziv</b></td>
+                    <th scope="col"><b>Cijena</b></td>
+                    <th scope="col"><b>Količina</b></td>
+                    <th scope="col"><b>Napomena</b></td>
+                    <th scope="col">&nbsp;</td>
+                    <th scope="col">&nbsp;</th>
+                </tr>
+                {% for dish in order.details %}
+                <tr align="center" class="collapse collapse-{{ order.id }}">
+                    <td>&nbsp;</td>
+                    <td> {{ dish.name }} </td>
+                    <td> {{ dish.price }} KM</td>
+                    <td> {{ dish.quantity }} </td>
+                    <td> {{ dish.note }} </td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                {% endfor %}
+
+            </div>
+
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+<!-- {% endif %} -->
+{% endblock content %}
