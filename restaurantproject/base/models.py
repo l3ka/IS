@@ -1,6 +1,9 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.core.files import File
+import urllib.request
+import os
 
 class Dogadjaj(models.Model):
     naziv = models.CharField(max_length = 20, help_text = 'Unesite naziv događaja')
@@ -57,15 +60,28 @@ class MeniStavka(models.Model):
     naziv = naziv = models.CharField(max_length = 30, help_text = 'Unesite naziv stavke')
     opis = models.TextField()
     cijena = models.DecimalField(max_digits = 4, decimal_places = 2)
-    fotografija = models.ImageField(upload_to = 'photos/menu/%Y/%m/%d')
+    url = models.CharField(max_length = 255, unique = True)
+    fotografija = models.ImageField(upload_to = 'photos/menu/%Y/%m/%d', blank = True)
     nijeUPonudi = models.BooleanField()
     meniStavkaKategorija = models.ForeignKey('MeniStavkaKategorija', on_delete = models.PROTECT)
 
     def __str__(self):
         return self.naziv
 
+    def cache(self):
+        if self.url and not self.fotografija:
+            result = urllib.request.urlretrieve(self.url)
+            self.fotografija.save(
+                    os.path.basename(self.url),
+                    File(open(result[0], 'rb'))
+                    )
+            self.save()
+
 class MeniStavkaTag(models.Model):
     tag = models.CharField(max_length = 20, help_text = 'Unesite tag')
+
+    def __str__(self):
+        return self.tag
 
 class SastojakMeniStavka(models.Model):
    naziv = models.CharField(max_length = 20, help_text = 'Unesite naziv')
@@ -82,12 +98,18 @@ class GrupaOpcija(models.Model):
     napomena = models.TextField()
     meniStavka = models.ForeignKey(MeniStavka, on_delete = models.CASCADE)
 
+    def __str__(self):
+        return f'{self.naziv} - {self.meniStavka}'
+
 class Opcija(models.Model):
     redniBroj = models.IntegerField()
     naziv = models.CharField(max_length = 20, help_text = 'Unesite naziv opcije')
     cijena = models.DecimalField(max_digits = 6, decimal_places = 2)
     imeDodatneSastojke = models.BooleanField()
     grupaOpcija = models.ForeignKey(GrupaOpcija, on_delete = models.CASCADE)
+
+    def __str__(self):
+        return f'{self.naziv} - {self.grupaOpcija}'
 
 class OpcijaSastojak(models.Model):
     sastojak = models.ForeignKey(Sastojak, on_delete = models.PROTECT)

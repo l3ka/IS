@@ -7,6 +7,9 @@ from .models import Stol
 from .models import MeniStavka
 from .models import Sastojak
 from .models import MeniStavkaKategorija
+from .models import Opcija
+from .models import GrupaOpcija
+from .models import MeniStavkaTag
 
 # TODO: Ne bi trebalo da admin sve ovo radi?
 
@@ -16,3 +19,6 @@ admin.site.register(Stol)
 admin.site.register(MeniStavka)
 admin.site.register(MeniStavkaKategorija)
 admin.site.register(Sastojak)
+admin.site.register(Opcija)
+admin.site.register(GrupaOpcija)
+admin.site.register(MeniStavkaTag)
