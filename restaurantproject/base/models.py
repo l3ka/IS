@@ -50,7 +50,7 @@ class Konobar(models.Model):
 
 class Sastojak(models.Model):
     naziv = models.CharField(max_length = 20, help_text = 'Unesite naziv sastojka')
-    jeUNedostaku = models.BooleanField()
+    jeUNedostaku = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
         return self.naziv
@@ -84,8 +84,7 @@ class MeniStavkaTag(models.Model):
         return self.tag
 
 class SastojakMeniStavka(models.Model):
-   naziv = models.CharField(max_length = 20, help_text = 'Unesite naziv')
-   kolicina = models.IntegerField()
+   kolicina = models.CharField(max_length=20, help_text='Unesite kolicinu')
    sastojak = models.ForeignKey(Sastojak, on_delete = models.PROTECT) 
    meniStavka = models.ForeignKey(MeniStavka, on_delete = models.PROTECT)
 
@@ -105,7 +104,7 @@ class Opcija(models.Model):
     redniBroj = models.IntegerField()
     naziv = models.CharField(max_length = 20, help_text = 'Unesite naziv opcije')
     cijena = models.DecimalField(max_digits = 6, decimal_places = 2)
-    imeDodatneSastojke = models.BooleanField()
+    imaDodatneSastojke = models.BooleanField()
     grupaOpcija = models.ForeignKey(GrupaOpcija, on_delete = models.CASCADE)
 
     def __str__(self):
@@ -129,20 +128,25 @@ class MeniStavkaKategorija(models.Model):
         return self.naziv
 
 class MeniStavkaKategorijaTag(models.Model):
-    tag = models.CharField(max_length = 20, help_text = 'Unesite tag')
+    tag = models.CharField(max_length = 32, help_text = 'Unesite tag')
     meniStavkaKategorijaTag = models.ForeignKey(MeniStavkaKategorija, on_delete = models.PROTECT)
 
 class Narudzba(models.Model):
-    vrijemeKreiranja = models.DateTimeField(default = timezone.now)
-    vrijemeProcesiranja = models.DateTimeField()
-    jePrihvacena = models.BooleanField()
-    napomena = models.TextField()
-    razlogOdbijanja = models.TextField()
-    dojam = models.TextField()
-    stol = models.IntegerField()
-    # TODO: DORADITI NE MOZE SE POKRENUTI ZA SADA !!!
-    konobarProcesira = models.ForeignKey(Konobar, on_delete = models.PROTECT, related_name = 'konobar_procesirao', null = True)
-    konobarKreira = models.ForeignKey(Konobar, on_delete = models.PROTECT, related_name = 'konobar_kreirao', null = True)
+    vrijemeKreiranja = models.DateTimeField(default=timezone.now)
+    vrijemeProcesiranja = models.DateTimeField(blank=True, null=True)
+    status = models.TextField(default="AWAITING_PROCESSING")
+    jePrihvacena = models.BooleanField(default=False)
+    napomena = models.TextField(blank=True, null=True)
+    razlogOdbijanja = models.TextField(blank=True, null=True)
+    dojam = models.TextField(blank=True, null=True)
+    stol = models.IntegerField(blank=True, null=True)
+
+    # TODO: Napraviti da radi i objasniti zasto ne radi?
+    konobarProcesira = models.ForeignKey(Konobar, on_delete = models.PROTECT, related_name = 'konobar_procesirao', null = True, blank=True)
+    konobarKreira = models.ForeignKey(Konobar, on_delete = models.PROTECT, related_name = 'konobar_kreirao', null = True, blank=True)
+    pushEndpoint = models.TextField(blank=True, null=True)
+    def __str__(self):
+        return f'Narudbza {self.id}'
 
 class NarudzbaStavka(models.Model):
     redniBroj = models.IntegerField()
@@ -151,6 +155,9 @@ class NarudzbaStavka(models.Model):
     napomena = models.TextField()
     meniStavka = models.ForeignKey(MeniStavka, on_delete = models.PROTECT)
     narudzba = models.ForeignKey(Narudzba, on_delete = models.PROTECT)
+
+    def __str__(self):
+        return f'{self.meniStavka} - {self.narudzba} r.b. {self.redniBroj}'
 
 class NarudzbaStavkaOdabraneOpcije(models.Model):
     naziv = models.CharField(max_length = 20, help_text = 'Unesite naziv')

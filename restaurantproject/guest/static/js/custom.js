@@ -1,5 +1,6 @@
 /* global $, Port */
 
+
 // TODO: modifikuj za narudzbe(PLURAL!!!)
 let KEY = 'Keyo';
 let orderKEY = 'orderKeyo';
@@ -8,55 +9,202 @@ const ordersPort = new Port(`${document.location.protocol}//${document.location.
 const hasStorage = typeof Storage !== 'undefined';
 
 $(document).ready(function () {
+    let fetchMenuItemAdditions = async (menuItemId) => {
+        return ordersPort.sendMessage(`/menu/additions/${menuItemId}/`, {}, {}).then(res => res.json());
+    };
     $('#modal-menu').on('show.bs.modal', function (event) {
         let button = $(event.relatedTarget); // Button that triggered the modal
         let title = button.data('title'); // Extract info from data-* attributes
-        let description = button.data('description');
-        let ingredients = button.data('ingredients');
-        let price = button.data('price');
-        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-        let modal = $(this);
-        modal.find('.modal-title').text(title);
-        modal.find('#item-description-text').val(description);
-        $('#item-description-text').scrollTop(0);
-        $('#item-ingredients-text').scrollTop(0);
-        if (!ingredients) {
-            $(modal.find('#item-ingredients-text')).hide();
-            $(modal.find('#item-ingredients')).hide();
-        } else {
-            $(modal.find('#item-ingredients-text')).show();
-            $(modal.find('#item-ingredients')).show();
-            modal.find('#item-ingredients-text').val(ingredients.replace(/,/g, '\n'));
-        }
-        modal.find('#badge-price').text(price + 'KM');
-        modal.find('#add-button').unbind('click');
-        modal.find('#add-button').click(function () {
-            if (!hasStorage) {
-                return;
+        let id = button.data('id');
+        fetchMenuItemAdditions(id).then(data => {
+            const allOptions = JSON.parse(JSON.stringify(data)); // Clone
+            let description = button.data('description');
+            let ingredients = button.data('ingredients');
+            const priceData = {
+                _basePrice: 0.0,
+                _price: 0.0,
+                set basePrice(value) {
+                    this._basePrice = value;
+                },
+                get basePrice() {
+                    return this._basePrice;
+                },
+                set price(value) {
+                    this._price = value;
+                    modal.find('#badge-price').text(this._price + 'KM');
+                },
+                get price() {
+                    return this._price;
+                }
+            };
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            let modal = $(this);
+            modal.find('.modal-title').text(title);
+            modal.find('#item-description-text').val(description);
+            $('#item-description-text').scrollTop(0);
+            $('#item-ingredients-text').scrollTop(0);
+            if (!ingredients) {
+                $(modal.find('#item-ingredients-text')).hide();
+                $(modal.find('#item-ingredients')).hide();
+            } else {
+                $(modal.find('#item-ingredients-text')).show();
+                $(modal.find('#item-ingredients')).show();
+                modal.find('#item-ingredients-text').val(ingredients.replace(/,/g, '\n'));
             }
 
-            const order = {
-                'name': title,
-                'price': price,
-                'note': '',
-                'amount': 1,
-                'id': -1
+            //################### PRILOZI ###################
+            const menuItemOptionsContainer = $(this).find('.menu-item-options .list-group');
+            const getOptionGroupHTML = (single, options) => {
+                let template = '';
+                if (single) {
+                    template += `<select class='single-option-select'>${
+                        options.map(op => {
+                            return `<option data-price=${op.price} data-name=${op.name} data-id=${op.id}> ${op.name}   (${op.price} KM) </option>`;
+                        }).join('')
+                    }</select>`;
+                } else {
+                    template += '<div class="optional-options-container">' + options.map(o => {
+                        return `<div class="optional">
+                                    <input type="checkbox" data-price=${o.price} data-name=${o.name} data-id=${o.id}>
+                                    <span class=""> ${o.name} </span>
+                                </div>`;
+                    }).join('') + '</div>';
+                }
+                return template;
             };
 
-            let orders = localStorage.getItem(KEY);
-            let menuItemId = localStorage.getItem(orderKEY) || 0;
-            orders = orders ? JSON.parse(orders) : [];
-            order.id = menuItemId;
-            orders.push(order);
-            menuItemId = +menuItemId + 1;
-            localStorage.setItem(orderKEY, menuItemId);
-            localStorage.setItem(KEY, JSON.stringify(orders));
+            const mandatoryOptionGroups = data.groups.filter(o => o.required);
+            mandatoryOptionGroups.forEach(element => {
+                const sample = `<li class="list-group-item menu-item-addition-group" data-id="${o.id}" data-price="0.0">
+                                    <span class='menu-item-options-title'> ${element.name} </span> 
+                                    ${getOptionGroupHTML(element.single, element.options)}
+                                </li>`;
+                menuItemOptionsContainer.append($(sample));
+            });
 
+            const availableOptions = data.groups.filter(o => !o.required);
+            const availableOptionsListHTML = `<li class="list-group-item">
+                <div class='menu-item-options-addmore' style="display:none">
+                    <span>Dodaj Prilog: </span>
+                    <select>
+                        <option selected></option>
+                        ${availableOptions.map(o => `<option>${o.name}</option>`).join('')}
+                    </select>
+                </div>
+            </li>`;
+
+            const updatePrice = () => {
+                let priced = [...document.querySelectorAll('.menu-item-options .list-group .list-group-item select option:checked[data-price]')];
+                priced = [...priced, ...document.querySelectorAll('.menu-item-options .list-group .list-group-item input:checked[type="checkbox"]')];
+                const totalAddidionalPrice = priced.reduce((prev, curr) => {
+                    return prev + +$(curr).data('price');
+                }, 0);
+                priceData.price = +priceData.basePrice + totalAddidionalPrice;
+            };
+
+            $(menuItemOptionsContainer).on('change', '.single-option-select', function (e) {
+                updatePrice();
+            });
+            $(menuItemOptionsContainer).on('change', '.list-group-item input', function (e) {
+                updatePrice();
+            });
+
+
+            if (availableOptions.length) {
+
+                const addOption = `<li class="list-group-item">
+                                    <img src='https://www.nginx.com/wp-content/plugins/nginxcom-plugin-ecommerce/nginx-cart/app/assets/images/nginx-plus-icon.png' width=16 height=16/>
+                               </li>`;
+
+                menuItemOptionsContainer.append($(addOption));
+                $('.list-group-item img').on('click', e => {
+                    $($(e.currentTarget).parent()).hide();
+                    $('.menu-item-options-addmore').show();
+                });
+
+
+                menuItemOptionsContainer.append($(availableOptionsListHTML));
+                $('.menu-item-options-addmore select').change(function (e) {
+                    const selectedIndex = availableOptions.findIndex(o => o.name == this.value);
+                    if (selectedIndex === -1) {
+                        return;
+                    }
+
+                    const selected = availableOptions.splice(selectedIndex, 1)[0];
+                    $($(e.currentTarget).find(':selected')).remove();
+                    const optionHTML = `<li class="list-group-item menu-item-addition-group" data-id="${selected.id}" data-price="0.0">
+                        <span class='menu-item-options-title'> ${selected.name} </span> 
+                        ${getOptionGroupHTML(selected.single, selected.options)}
+                    </li>`;
+                    $($(optionHTML)).insertBefore($('.list-group-item img').parent());
+                    $('.menu-item-options-addmore').hide();
+                    if (availableOptions.length > 0) {
+                        $($('.list-group-item img').parent()).show();
+                    }
+                });
+            }
+
+
+            //################# END PRILOZI ###########################
+            priceData.basePrice = button.data('price');
+            modal.find('#add-button').unbind('click');
+            modal.find('#add-button').click(function () {
+                if (!hasStorage) {
+                    return;
+                }
+
+                let optionGroupsElements = [...document.querySelectorAll('.menu-item-options .list-group .menu-item-addition-group[data-id]')];
+                let options = {
+                    groups: []
+                };
+
+                for (optionGr of optionGroupsElements) {
+                    const ogrid = $(optionGr).data('id');
+                    const optionGroupInfo = allOptions.groups.find(o => o.id == ogrid);
+                    const selected = [...$(optionGr).find(optionGroupInfo.single ? 'select option:checked[data-id]' : 'input:checked[data-id]')];
+                    const selectedInfo = selected.map(s => {
+                        const el = $(s);
+                        return {
+                            name: el.data('name'),
+                            id: el.data('id'),
+                            price: el.data('price')
+                        };
+                    });
+                    options.groups.push({
+                        name: optionGroupInfo.name,
+                        id: optionGroupInfo.id,
+                        selected: selectedInfo
+                    });
+                }
+
+                const order = {
+                    'name': title,
+                    'price': priceData.price,
+                    'note': '',
+                    'amount': 1,
+                    'id': -1,
+                    options,
+                    pushEndpoint: localStorage.getItem('pushEndpoint')
+                };
+
+                let orders = localStorage.getItem(KEY);
+                let menuItemId = localStorage.getItem(orderKEY) || 0;
+                orders = orders ? JSON.parse(orders) : [];
+                order.id = menuItemId;
+                orders.push(order);
+                menuItemId = +menuItemId + 1;
+                localStorage.setItem(orderKEY, menuItemId);
+                localStorage.setItem(KEY, JSON.stringify(orders));
+            });
         });
     });
 
     $('#modal-order').on('show.bs.modal', function () {
+        $('#order-modal-error').hide();
+        $('#order-modal-error').text('');
+        $('#order-modal-success').hide();
+        $('#order-modal-success').text('');
         let orders = hasStorage ? JSON.parse(localStorage.getItem(KEY)) : null;
         if (orders == null) {
             return;
@@ -72,41 +220,62 @@ $(document).ready(function () {
         });
         modal.find('#send-order-button').unbind('click');
         modal.find('#send-order-button').click(function () {
+
             if (!hasStorage) {
                 return;
             }
+
             // zasad samo obrisi iz localStorage-a, pa kad se bude radilo posalji poruku
             orders = localStorage.getItem(KEY);
             if (orders !== null) {
                 let pastOrder = JSON.parse(orders);
-                ordersPort.sendMessage('/order/', {}, { order: pastOrder }).then(res =>res.json()).then(response => {
+                ordersPort.sendMessage('/order/', {}, { order: pastOrder }).then(res => res.json()).then(response => {
                     // TODO: Process response and handle errors
-                    ordersPort.addOnMessageListener({ path: `/order-status/${response.order.id}/`, id: 'order-status' }, async response => {
-                        const message = await response.json();
-                        if (!message || !message.order) {
-                            return;
-                        }
-
-                        if (message.order.status === 'READY') {
-                            // TODO: Notify 
-                            ordersPort.removeOnMessageListener('order-status');
-                        }
+                    const orderId = +response.order.id;
+                    if (Number.isNaN(orderId)) {
+                        throw new Error('Invalid order ID');
                     }
-                    );
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.register('/sw.js');
+                    } else {
+                        // TODO: Handle this unfortunate situation.
+                    }
+
+                    navigator.serviceWorker.controller.postMessage(response.order.id);
+                    pastOrder.id = orderId;
+                    pastOrder.status = orderStatuses.AWAITING_PROCESSING.ID;
+
+                    if (pastOrder.length !== 0) {
+                        const pastOrdetTimeObj = {
+                            'pastOrder': pastOrder,
+                            'time_ordered': Date.now() // kasnije pri prikazu bivsih narudzbi svaku stariju od 24 sata brisem i ne pokazaujem
+                        };
+                        const pastOrdersJSON = localStorage.getItem(pastOrdersKey);
+                        const pastOrders = pastOrdersJSON ? JSON.parse(pastOrdersJSON) : [];
+                        pastOrders.push(pastOrdetTimeObj);
+                        localStorage.setItem(pastOrdersKey, JSON.stringify(pastOrders));
+                    }
+
+                    // ordersPort.addOnMessageListener({ path: `/order-status/${response.order.id}/`, id: 'order-status' }, async response => {
+                    //     const message = await response.json();
+                    //     if (!message || !message.order) {
+                    //         return;
+                    //     }
+                    //     console.log(message.order.status);
+                    //     if (message.order.status === orderStatuses.READY.ID) {
+                    //         // TODO: Notify 
+                    //         ordersPort.removeOnMessageListener('order-status');
+                    //     }
+                    // }
+                    // );
+                    localStorage.setItem(KEY, JSON.stringify([]));
+                    $('#order-modal-success').text('Uspješno ste poslali narudžbu.');
+                    $('#order-modal-success').show();
+                }).catch(_ => {
+                    $('#order-modal-error').text('Problem kod slanja narudžbe. Molimo pozovite konobara.' + _);
+                    $('#order-modal-error').show();
                 });
-                if (pastOrder.length !== 0) {
-                    const pastOrdetTimeObj = {
-                        'pastOrder': pastOrder,
-                        'time_ordered': Date.now() // kasnije pri prikazu bivsih narudzbi svaku stariju od 24 sata brisem i ne pokazaujem
-                    };
-                    const pastOrdersJSON = localStorage.getItem(pastOrdersKey);
-                    const pastOrders = pastOrdersJSON ? JSON.parse(pastOrdersJSON) : [];
-                    pastOrders.push(pastOrdetTimeObj);
-                    localStorage.setItem(pastOrdersKey, JSON.stringify(pastOrders));
-                }
             }
-            // Clear current order
-            localStorage.setItem(KEY, JSON.stringify([]));
         });
         // + operator for casting to Number
         let priceSum = orders.reduce((a, b) => +a + +b.price * (+b.amount), 0);
@@ -117,13 +286,14 @@ $(document).ready(function () {
             $(this).find('#badge-price').text(priceSum + 'KM');
         }
     });
-    $('#modal-order').on('hidden . bs.modal', function () {
+    $('#modal-order').on('hidden.bs.modal', function () {
         $(this).find('#menu-items').empty();
     });
-    $('#modal-past-orders').on('hidden.b s .modal', function () {
+    $('#modal-past-orders').on('hidden.bs.modal', function () {
         $(this).find('#past-menu-items-orders').empty();
     });
-    $('#modal-past-orders').on('show.bs. m odal ', function () {
+    $('#modal-past-orders').on('show.bs.modal', function () {
+        debugger;
         if (hasStorage) {
             const pastOrdersJSON = localStorage.getItem(pastOrdersKey);
             if (pastOrdersJSON == null) {
@@ -157,6 +327,7 @@ $(document).ready(function () {
                         '<td>' + +pastMenuItem.amount * (+pastMenuItem.price) + ' KM</td>';
                     fragment.append(tempHTML);
                 }
+                fragment.append('<td colspan="4"><b style="color: black">GOTOVO</b></td>');
                 tempHTML = document.createElement('tr');
                 tempHTML.align = 'right';
                 tempHTML.style = 'align-items: right';

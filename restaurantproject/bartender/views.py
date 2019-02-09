@@ -4,6 +4,9 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 import datetime
+from base.models import MeniStavka, Sastojak, SastojakMeniStavka, Narudzba, NarudzbaStavka, NarudzbaStavkaOdabraneOpcije
+from base.common.orders import ORDER_STATUSES
+from decimal import Decimal
 
 dishes_first = [
     {
@@ -131,6 +134,34 @@ base_props = {
 def orders_screen(request):
     if is_member(request.user, 'Konobar'):
         return HttpResponseRedirect(reverse('guest-menu'))
+    orders = []
+    for o in Narudzba.objects.all().exclude(status=ORDER_STATUSES['CANCELLED']['ID']):
+        items = list(o.narudzbastavka_set.all())
+        items_mapped = []
+        price = Decimal(0)
+        for i in items:
+            total_item_price = i.cijenaBezOpcija + sum([j.cijena for j in i.narudzbastavkaodabraneopcije_set.all()])
+            price += total_item_price
+            prilozi = list(NarudzbaStavkaOdabraneOpcije.objects.filter(narudzbaStavka=i.id))
+            items_mapped.append({
+                'img_url': i.meniStavka.fotografija,
+                'name': i.meniStavka.naziv,
+                'description': i.meniStavka.opis,
+                'price': total_item_price,
+                'quantity': i.kolicina,
+                'note': i.napomena,
+                'additions': '\n'.join([ad.naziv for ad in prilozi])
+            })
+
+        orders.append({
+            'table_number': o.stol,
+            'time_ordered': o.vrijemeKreiranja,
+            'details': items_mapped,
+            'price_together': price, 
+            'id': o.id,
+            'status':  o.status,
+            'status_text':  ORDER_STATUSES[o.status]['TEXT']
+        })
     context = {
         'orders': orders,
     }

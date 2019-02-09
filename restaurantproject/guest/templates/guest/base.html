@@ -15,7 +15,7 @@
     <meta charset="UTF-8">
     <!-- Site Title -->
     <title>{{ base_props.restaurant }}</title>
-
+    <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,400,300,500,600,700" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--
@@ -42,7 +42,9 @@
         crossorigin="anonymous"></script>
 
     <script src="{% static 'js/port.js' %}"></script>
+    <script src="{% static 'js/orders.js' %}"></script>
     <script src="{% static 'js/custom.js' %}"></script>
+    <script src="{% static 'js/notifications.js' %}"></script>
 
 
 </head>
@@ -68,6 +70,10 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal" id="close-button">Zatvori</button>
                     <button type="button" class="btn btn-danger" id="send-order-button">Pošalji narudžbu</button>
+                </div>
+                <div id="order-modal-error" class="alert alert-danger" style="display:none" role="alert">
+                </div>
+                <div id="order-modal-success" class="alert alert-success" style="display:none" role="alert">
                 </div>
             </div>
         </div>

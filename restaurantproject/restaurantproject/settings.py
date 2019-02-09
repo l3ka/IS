@@ -46,21 +46,7 @@ SECRET_KEY = 'eam6a2=62-4791^o-z0z+*xhjk$3^w@9$4v4a2#96%y-cnftdj'
 DEBUG = True
 
 # TODO: Naci bolju alternativu.
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '10.99.161.122',
-    '10.99.177.11',
-    '10.99.161.97',
-    '10.99.178.129',
-    '10.99.161.122'
-]
-
-# TODO: Ovo nije bolja alternativa.
-# ALLOWED_HOSTS += ['192.168.{}.{}'.format(i,j) for i in range(256) for j in range(256)]
-# ALLOWED_HOSTS += ['10.{}.{}.{}'.format(i,j,k) for i in range(256) for j in range(256) for k in range(256)]
-# ALLOWED_HOSTS += ['172.{}.{}.{}'.format(i,j,k) for i in range(16,32) for j in range(256) for k in range(256)]
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -105,7 +91,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'restaurantproject.wsgi.application'
-
+PROJECT_PATH = os.path.abspath(os.path.dirname(__name__))
+PUSH_SERVER_KEY = 'AAAAcoBZp9U:APA91bF_8D6yelhwahaa2WxtpWaqdFh-6RfXXJMTWr_0_npoYRBfqfbzoCtX7ClZyNb2kONy7ykWGgAsC1T1JeqTB5SKwmOjL-1wG4FosHCT7m9QT27Ks_LfnmWhD0Fs-LYnR8dk7TG7'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -113,17 +100,14 @@ WSGI_APPLICATION = 'restaurantproject.wsgi.application'
 # TODO: Podesiti PostgreSQL.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        # 'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        # 'NAME': os.path.join(BASE_DIR, 'db.postgresql'),
-        # 'USER': 'user',
-        # 'PASSWORD': 'password',
-        # 'HOST': '127.0.0.1',
-        # 'PORT': '8000',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'yummy',
+        'USER': 'yummy_user',
+        'PASSWORD': 'restoran',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -151,7 +135,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 
 # TODO: Podesiti na nasu?
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Sarajevo'
 
 USE_I18N = True
 

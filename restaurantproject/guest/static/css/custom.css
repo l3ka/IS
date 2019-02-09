@@ -1,7 +1,35 @@
-.modal-body, .modal-header, .modal-footer {
+.modal-body,
+.modal-header,
+.modal-footer {
     background: #fdf5e6;
 }
 
 p {
     color: #777
+}
+
+.modal .alert {
+    border: none;
+    padding: 10px;
+    margin: 0;
+}
+
+.optional-options-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: stretch;
+}
+
+.optional {
+    min-width: 200px;
+    height: 30px;
+    margin: auto;
+    flex-grow: 1;
+}
+
+.menu-item-options-title {
+    font-weight: 600;
+    display: inline-flex;
 }

@@ -64,6 +64,13 @@
             }
             modal.find('#badge-price').text(price + 'KM')
         })
+
+        // Hide the Modal
+        // TODO: @Nedeljko, ovaj kod ne radi nis :?
+        $("#add-button").click(function(){
+            console.log('test');
+            $("#modal-menu").modal("hide");
+        });
     })
 </script>
 
@@ -87,12 +94,19 @@
                         <label for="item-ingredients" class="col-form-label" id="item-ingredients">Sastojci</label>
                         <textarea class="form-control" id="item-ingredients-text" readonly="readonly"></textarea>
                     </div>
+                    <div class="form-group menu-item-options">
+                        <label for="menu-item-options" class="col-form-label" id="item-options-label">Prilozi</label>
+                        <ul class="list-group">
+
+                        </ul>
+                    </div>
                     <h3><span class="badge badge-dark" id="badge-price" style="float:right">100KM</span></h3>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="close-button">Zatvori</button>
-                <button type="button" class="btn btn-danger" id="add-button">Dodaj u narudžbu</button>
+                <!-- TODO: @Nedeljko: Jel dobro ovo zatvarati sa data-dismis?? -->
+                <button type="button" class="btn btn-danger" id="add-button" data-dismiss="modal">Dodaj u narudžbu</button>
             </div>
         </div>
     </div>
@@ -101,77 +115,30 @@
 <!-- Start top-dish Area -->
 <section class="top-dish-area section-gap" id="dish">
     <div class="container">
-        <div class="row d-flex justify-content-center">
-            <div class="menu-content pb-60 col-lg-8">
-                <div class="title text-center">
-                    <h1 class="mb-10">Jela</h1>
+            {% for key, value_list in meniStavke.items %}
+            <div class="row d-flex justify-content-center">
+                <div class="menu-content pb-60 col-lg-8">
+                    <div class="title text-center">
+                        <h1 class="mb-10">{{key}}</h1>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            {% for dish in dishes %}
-            <div class="single-dish col-lg-4">
-                <div class="thumb">
-                    <img class="img-fluid" data-toggle="modal" data-target="#modal-menu" data-description="{{ dish.description }}"
-                        data-title="{{ dish.name }}" data-ingredients="Sastojak 1,Sastojak 2,Sastojak 3" data-price="{{ dish.price }}"
-                        src="{% static dish.img_url %}" style="width:360px; height:250px" alt="">
-                </div>
-                <h4 class="text-uppercase pt-20 pb-20">{{ dish.name }}</h4>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="row">
-            {% for dish in recommended_dishes %}
-            <div class="single-dish col-lg-4">
-                <div class="thumb">
-                    <img class="img-fluid" data-toggle="modal" data-target="#modal-menu" data-description="{{ dish.description }}"
-                        data-title="{{ dish.name }}" data-ingredients="Sastojak 1,Sastojak 2,Sastojak 3" data-price="{{ dish.price }}"
-                        src="{% static dish.img_url %}" style="width:360px; height:250px" alt="">
-                </div>
-                <h4 class="text-uppercase pt-20 pb-20">{{ dish.name }}</h4>
+            <div class="row">
+                {% for value in value_list %}
+                    <div class="single-dish col-lg-4">
+                        <div class="thumb">
+                            <img class="img-fluid" data-toggle="modal" data-target="#modal-menu" data-description="{{ value.opis }}"
+                                data-id="{{ value.id }}" data-title="{{ value.naziv }}"
+                                data-ingredients="{{ value.sastojci }}" data-price="{{ value.cijena }}" src="/media/{{ value.fotografija }}"
+                                style="width:360px; height:250px" alt="">
+                        </div>
+                        <h4 class="text-uppercase pt-20 pb-20">{{ value.naziv }}</h4>
+                    </div>
+                {% endfor %}
             </div>
             {% endfor %}
         </div>
     </div>
 </section>
 <!-- End top-dish Area -->
-
-<!-- Start top-dish Area -->
-<section class="top-dish-area section-gap" id="drinks">
-    <div class="container">
-        <div class="row d-flex justify-content-center">
-            <div class="menu-content pb-60 col-lg-8">
-                <div class="title text-center">
-                    <h1 class="mb-10">Pića</h1>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            {% for drink in recommended_drinks %}
-            <div class="single-dish col-lg-4">
-                <div class="thumb">
-                    <img class="img-fluid" data-toggle="modal" data-target="#modal-menu" data-description="{{ drink.description }}"
-                        data-title="{{ drink.name }}" data-price="{{ drink.price }}" src="{% static drink.img_url %}"
-                        style="width:360px; height:250px" alt="">
-                </div>
-                <h4 class="text-uppercase pt-20 pb-20">{{ drink.name }}</h4>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="row">
-            {% for drink in recommended_drinks %}
-            <div class="single-dish col-lg-4">
-                <div class="thumb">
-                    <img class="img-fluid" data-toggle="modal" data-target="#modal-menu" data-description="{{ drink.description }}"
-                        data-title="{{ drink.name }}" data-price="{{ drink.price }}" src="{% static drink.img_url %}"
-                        style="width:360px; height:250px" alt="">
-                </div>
-                <h4 class="text-uppercase pt-20 pb-20">{{ drink.name }}</h4>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-<!-- End top-dish Area -->
-
 {% endblock content %}

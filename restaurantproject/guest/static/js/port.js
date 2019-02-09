@@ -7,7 +7,7 @@ class Port {
         this.url = url;
         this.hooks = {};
     }
-    sendMessage(path, params, data) {
+    sendMessage(path, params, data, optionsOverride = {}) {
         params = params || {};
 
         const options = {
@@ -20,7 +20,7 @@ class Port {
 
         if (typeof data === 'object') {
             options.body = JSON.stringify(data);
-            options.method = 'POST';
+            options.method = optionsOverride.method || 'POST';
             const csrfTokenMatch = CSRFRegExp.exec(document.cookie),
                 csrfToken = csrfTokenMatch && csrfTokenMatch.length == 2 ? csrfTokenMatch[1] : null;
             options.headers = {

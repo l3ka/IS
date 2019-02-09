@@ -1,0 +1,9 @@
+{
+    "short_name": "Yummy",
+    "name": "Yummy",
+    "start_url": "/guest",
+    "background_color": "#3367D6",
+    "display": "standalone",
+    "gcm_sender_id": "491779631061",
+    "applicationServerKey": "AAAAcoBZp9U:APA91bF_8D6yelhwahaa2WxtpWaqdFh-6RfXXJMTWr_0_npoYRBfqfbzoCtX7ClZyNb2kONy7ykWGgAsC1T1JeqTB5SKwmOjL-1wG4FosHCT7m9QT27Ks_LfnmWhD0Fs-LYnR8dk7TG7"
+}
