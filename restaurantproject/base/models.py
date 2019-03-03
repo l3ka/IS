@@ -140,14 +140,13 @@ class Narudzba(models.Model):
     razlogOdbijanja = models.TextField(blank=True, null=True)
     dojam = models.TextField(blank=True, null=True)
     stol = models.IntegerField(blank=True, null=True)
-
     # TODO: Napraviti da radi i objasniti zasto ne radi?
     konobarProcesira = models.ForeignKey(Konobar, on_delete = models.PROTECT, related_name = 'konobar_procesirao', null = True, blank=True)
     konobarKreira = models.ForeignKey(Konobar, on_delete = models.PROTECT, related_name = 'konobar_kreirao', null = True, blank=True)
     pushEndpoint = models.TextField(blank=True, null=True)
     def __str__(self):
         return f'Narudbza {self.id}'
-
+    
 class NarudzbaStavka(models.Model):
     redniBroj = models.IntegerField()
     cijenaBezOpcija = models.DecimalField(max_digits = 6, decimal_places = 2)
@@ -158,6 +157,14 @@ class NarudzbaStavka(models.Model):
 
     def __str__(self):
         return f'{self.meniStavka} - {self.narudzba} r.b. {self.redniBroj}'
+
+    @property
+    def cijenaSaOpcijama(self):
+        from django.db.models import Sum
+        from django.db.models import Value
+        from django.db.models.functions import Coalesce
+        return self.cijenaBezOpcija \
+            + self.narudzbastavkaodabraneopcije_set.aggregate(suma=Coalesce(Sum('cijena'), Value(0)))['suma']
 
 class NarudzbaStavkaOdabraneOpcije(models.Model):
     naziv = models.CharField(max_length = 20, help_text = 'Unesite naziv')

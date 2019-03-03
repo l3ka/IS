@@ -1,0 +1,37 @@
+{% block content %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+
+<!-- TODO: Ovo je potrebno centrirati, pisano je originalno u BulmaCSS, ali sad je na tebi red da sam napravis, @Neko -->
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column" id="pie"></div>
+            <div class="column" id="bar"></div>
+        </div>
+    </div>
+</section>
+<script>
+    let pie = {{ pie | safe }};
+    let bar = {{ bar | safe }};
+
+    let layout = {
+        title: 'Prodaja po kategorijama',
+        height: 400,
+        width: 800,
+        xaxis: {
+            title: {
+                text: 'Meni kategorija'
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Prihodi [KM]'
+            }
+        }
+    };
+
+    Plotly.newPlot('pie', pie, layout);
+    Plotly.newPlot('bar', bar, layout);
+</script>
+{% endblock %}

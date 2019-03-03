@@ -12,7 +12,28 @@ $(document).ready(function () {
     let fetchMenuItemAdditions = async (menuItemId) => {
         return ordersPort.sendMessage(`/menu/additions/${menuItemId}/`, {}, {}).then(res => res.json());
     };
+    $('#modal-call-bartender').on('show.bs.modal', function (event) {
+        const tableNumber = sessionStorage.getItem('tableNumber');
+        if (!tableNumber) {
+            return;
+        }
+        $('#table-number-select').val(tableNumber);
+        $('#call-bartender-table').val(tableNumber);
+    });
+    $('#call-bartender-button').click(e => {
+        const tableNumber = +$('#table-number-select').val();
+        if (!tableNumber) {
+            return;
+        }
+        sessionStorage.setItem('tableNumber', tableNumber);
+        ordersPort.sendMessage('/call-bartender/', {}, { tableNumber }).then(res => res.json()).then(response => {
+            console.log(1);
+        });
+    });
     $('#modal-menu').on('show.bs.modal', function (event) {
+        $('.list-group').html('');
+        $('#add-item-success').hide();
+        $('#add-item-success-row').hide();
         let button = $(event.relatedTarget); // Button that triggered the modal
         let title = button.data('title'); // Extract info from data-* attributes
         let id = button.data('id');
@@ -31,7 +52,7 @@ $(document).ready(function () {
                 },
                 set price(value) {
                     this._price = value;
-                    modal.find('#badge-price').text(this._price + 'KM');
+                    modal.find('#badge-price').text((+this._price).toFixed(2) + 'KM');
                 },
                 get price() {
                     return this._price;
@@ -77,7 +98,7 @@ $(document).ready(function () {
             const mandatoryOptionGroups = data.groups.filter(o => o.required);
             mandatoryOptionGroups.forEach(element => {
                 const sample = `<li class="list-group-item menu-item-addition-group" data-id="${o.id}" data-price="0.0">
-                                    <span class='menu-item-options-title'> ${element.name} </span> 
+                                    <span class='menu-item-options-title'> ${element.name} </span>
                                     ${getOptionGroupHTML(element.single, element.options)}
                                 </li>`;
                 menuItemOptionsContainer.append($(sample));
@@ -134,7 +155,7 @@ $(document).ready(function () {
                     const selected = availableOptions.splice(selectedIndex, 1)[0];
                     $($(e.currentTarget).find(':selected')).remove();
                     const optionHTML = `<li class="list-group-item menu-item-addition-group" data-id="${selected.id}" data-price="0.0">
-                        <span class='menu-item-options-title'> ${selected.name} </span> 
+                        <span class='menu-item-options-title'> ${selected.name} </span>
                         ${getOptionGroupHTML(selected.single, selected.options)}
                     </li>`;
                     $($(optionHTML)).insertBefore($('.list-group-item img').parent());
@@ -148,11 +169,15 @@ $(document).ready(function () {
 
             //################# END PRILOZI ###########################
             priceData.basePrice = button.data('price');
+            priceData.price = button.data('price');// @Nedeljko, nisam siguran, da li ce ovo fix, ali trenutno ako ne dodas prilog cijena je 0.00KM
             modal.find('#add-button').unbind('click');
             modal.find('#add-button').click(function () {
                 if (!hasStorage) {
                     return;
                 }
+
+                modal.find('#add-item-success').show();
+                modal.find('#add-item-success-row').show();
 
                 let optionGroupsElements = [...document.querySelectorAll('.menu-item-options .list-group .menu-item-addition-group[data-id]')];
                 let options = {
@@ -196,21 +221,32 @@ $(document).ready(function () {
                 menuItemId = +menuItemId + 1;
                 localStorage.setItem(orderKEY, menuItemId);
                 localStorage.setItem(KEY, JSON.stringify(orders));
+
+                setTimeout(function () {
+                    modal.modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    $('body').css('padding-right', '0px');
+                }, 2000);
             });
         });
     });
 
     $('#modal-order').on('show.bs.modal', function () {
+        const tableNumber = sessionStorage.getItem('tableNumber');
+        if (tableNumber) {
+            $('#table-number-select').val(tableNumber);
+        }
         $('#order-modal-error').hide();
         $('#order-modal-error').text('');
         $('#order-modal-success').hide();
         $('#order-modal-success').text('');
-        let orders = hasStorage ? JSON.parse(localStorage.getItem(KEY)) : null;
-        if (orders == null) {
+        let orderItemsJson = hasStorage ? JSON.parse(localStorage.getItem(KEY)) : null;
+        if (orderItemsJson == null) {
             return;
         }
-        for (var i in orders) {
-            createMenuItemOrdered(orders[i]);
+        for (var i in orderItemsJson) {
+            createMenuItemOrdered(orderItemsJson[i]);
         }
         const modal = $(this);
         modal.find('#close-button').unbind('click');
@@ -226,10 +262,11 @@ $(document).ready(function () {
             }
 
             // zasad samo obrisi iz localStorage-a, pa kad se bude radilo posalji poruku
-            orders = localStorage.getItem(KEY);
-            if (orders !== null) {
-                let pastOrder = JSON.parse(orders);
-                ordersPort.sendMessage('/order/', {}, { order: pastOrder }).then(res => res.json()).then(response => {
+            orderItemsJson = localStorage.getItem(KEY);
+            let orderItems = JSON.parse(orderItemsJson);
+            const tableNumber = +$('#table-number-select').val();
+            if (orderItemsJson !== null && orderItems.length !== 0) {
+                ordersPort.sendMessage('/order/', {}, { orderItems: orderItems, tableNumber: tableNumber }).then(res => res.json()).then(response => {
                     // TODO: Process response and handle errors
                     const orderId = +response.order.id;
                     if (Number.isNaN(orderId)) {
@@ -242,12 +279,13 @@ $(document).ready(function () {
                     }
 
                     navigator.serviceWorker.controller.postMessage(response.order.id);
-                    pastOrder.id = orderId;
-                    pastOrder.status = orderStatuses.AWAITING_PROCESSING.ID;
+                    orderItems.id = orderId;
+                    orderItems.status = orderStatuses.AWAITING_PROCESSING.ID;
 
-                    if (pastOrder.length !== 0) {
+                    if (orderItems.length !== 0) {
                         const pastOrdetTimeObj = {
-                            'pastOrder': pastOrder,
+                            'pastOrder': orderItems,
+                            id: orderId,
                             'time_ordered': Date.now() // kasnije pri prikazu bivsih narudzbi svaku stariju od 24 sata brisem i ne pokazaujem
                         };
                         const pastOrdersJSON = localStorage.getItem(pastOrdersKey);
@@ -278,12 +316,12 @@ $(document).ready(function () {
             }
         });
         // + operator for casting to Number
-        let priceSum = orders.reduce((a, b) => +a + +b.price * (+b.amount), 0);
+        let priceSum = orderItemsJson.reduce((a, b) => +a + +b.price * (+b.amount), 0);
         if (priceSum == 0) {
             $(this).find('#badge-price').hide();
         } else {
             $(this).find('#badge-price').show();
-            $(this).find('#badge-price').text(priceSum + 'KM');
+            $(this).find('#badge-price').text((+priceSum).toFixed(2) + 'KM');
         }
     });
     $('#modal-order').on('hidden.bs.modal', function () {
@@ -293,28 +331,37 @@ $(document).ready(function () {
         $(this).find('#past-menu-items-orders').empty();
     });
     $('#modal-past-orders').on('show.bs.modal', function () {
-        debugger;
         if (hasStorage) {
             const pastOrdersJSON = localStorage.getItem(pastOrdersKey);
             if (pastOrdersJSON == null) {
                 return;
             }
+
             let pastOrders = JSON.parse(pastOrdersJSON) || [];
             let needToUpdate = false;
             const currentTime = Date.now();
 
             for (var i in pastOrders) {
-                if ((Math.abs(currentTime - pastOrders[i].time_ordered) / 36e5) > 24) {
-                    needToUpdate = true;
-                    continue;
-                }
+                // if ((Math.abs(currentTime - pastOrders[i].time_ordered) / 36e5) > 24) {
+                //     needToUpdate = true;
+                //     continue;
+                // }
+                const orderId = pastOrders[i].id;
+                ordersPort.sendMessage(`/order-status/${orderId}/`).then(res => res.json()).then(message => {
+                    if (!message || !message.order) {
+                        return;
+                    }
+                    const status = orderStatuses[message.order.status].TEXT;
+                    $(`.status-text-${orderId}`).text(status);
+                });
 
                 let fragment = $('#past-menu-items-orders');
                 let tempHTML = document.createElement('tr');
                 tempHTML.className = 'form-group';
+                tempHTML.classList.add(`order-info-${orderId}`);
 
                 tempHTML.align = 'center';
-                tempHTML.innerHTML = '<td colspan="4"><b style="color: black"> Narudžba ' + (parseInt(i) + 1) + '</b></td>';
+                tempHTML.innerHTML = '<tdcolspan="4"><b style="color: black"> Narudžba ' + (parseInt(i) + 1) + '</b></td>';
                 fragment.append(tempHTML);
                 for (var j in pastOrders[i].pastOrder) {
                     tempHTML = document.createElement('tr');
@@ -327,7 +374,7 @@ $(document).ready(function () {
                         '<td>' + +pastMenuItem.amount * (+pastMenuItem.price) + ' KM</td>';
                     fragment.append(tempHTML);
                 }
-                fragment.append('<td colspan="4"><b style="color: black">GOTOVO</b></td>');
+                fragment.append(`<td  colspan="4"><b class="status-text-${orderId}"  style="color: black">GOTOVO</b></td>`);
                 tempHTML = document.createElement('tr');
                 tempHTML.align = 'right';
                 tempHTML.style = 'align-items: right';
@@ -390,9 +437,8 @@ function removeMenuItem(menuItemId) {
         let priceSum = orders.reduce((a, b) => +a + +b.price * (+b.amount), 0);
         if (priceSum == 0) {
             $('#badge-price').hide();
-            $('#badge-price').show();
         } else {
-            $('#badge-price').text(priceSum + 'KM');
+            $('#badge-price').text((+priceSum).toFixed(2) + 'KM');
         }
     }
     localStorage.setItem(KEY, JSON.stringify(orders));
@@ -426,7 +472,7 @@ function updateMenuItemAmount(operation, menuItemId) {
                     $('#badge-price').hide();
                 } else {
                     $('#badge-price').show();
-                    $('#badge-price').text(priceSum + 'KM');
+                    $('#badge-price').text((+priceSum).toFixed(2) + 'KM');
                 }
             }
         } else {
@@ -441,7 +487,7 @@ function updateMenuItemAmount(operation, menuItemId) {
                     $('#badge-price').hide();
                 } else {
                     $('#badge-price').show();
-                    $('#badge-price').text(priceSum + 'KM');
+                    $('#badge-price').text((+priceSum).toFixed(2) + 'KM');
                 }
             }
         }

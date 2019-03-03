@@ -19,4 +19,4 @@ ORDER_STATUSES = {
         'ID': 'COMPLETED',
         'TEXT': 'Završeno'
     }
-};
+}

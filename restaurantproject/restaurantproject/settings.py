@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'base.apps.BaseConfig',
     'guest.apps.GuestConfig',
     'bartender.apps.BartenderConfig',
+    'reports.apps.ReportsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -104,6 +105,8 @@ DATABASES = {
         'NAME': 'yummy',
         'USER': 'yummy_user',
         'PASSWORD': 'restoran',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -154,3 +157,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # TODO: Ne bi trebalo vaziti za sve pristupe?
 LOGIN_REDIRECT_URL = 'bartender-orders'
+LOGOUT_REDIRECT_URL = '/'

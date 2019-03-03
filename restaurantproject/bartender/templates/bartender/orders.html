@@ -4,52 +4,67 @@
 
 {% block content %}
 <!-- {% if user.is_authenticated %} -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-    crossorigin="anonymous">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
 <!-- ako ukljucis ovo, onda se expanda jednom dobro i vise ne moze zatvoriti jer ga opet otvori ??? -->
 <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script> -->
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
     crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
     crossorigin="anonymous"></script>
 
 <style>
     p {
         color: #777
     }
-    b { 
+
+    b {
         color: white
     }
 
+    #modal-cancel-order-reason {
+        width: 465px;
+        height: 200px;
+        padding: 5px;
+        line-height: 1em;
+    }
 </style>
-<!-- TODO: @Savo ili @Nedeljko ispisivati pravo narudzbe iz baze, ali samo one koje nisu procesiranje -->
-<div style="margin-top: 60px;margin-left: 60px;margin-right: 60px;">
-    <table id='orders-table' class="table table-striped table-hover" style="overflow-x:auto">
-        <div id='modal-cancel-order' class="modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Odbij narudžbu</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Unesite razlog odbijanja</p>
-                        <textarea id='modal-cancel-order-reason'>
 
-                        </textarea>
+<div id='modal-cancel-order' class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Odbij narudžbu</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="cancelation-reason-label" class="col-form-label" id="cancelation-reason-label">
+                            Unesite razlog odbijanja
+                        </label>
+                        <textarea id='modal-cancel-order-reason'></textarea>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" id='modal-cancel-order-submit' class="btn btn-primary btn-outline-danger">Odbij</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zatvori</button>
-                    </div>
-                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id='modal-cancel-order-submit'
+                    class="btn btn-primary btn-outline-danger">Odbij</button>
+                <button type="button" class="btn btn-secondary close-modal" data-dismiss="modal">Zatvori</button>
             </div>
         </div>
+    </div>
+</div>
+
+<div style="margin-top: 60px;margin-left: 60px;margin-right: 60px;">
+    <table id='orders-table' class="table table-striped table-hover" style="overflow-x:auto">
         <thead class="thead-dark">
             <tr align="center" style="border-left: solid #212529 20px; border-right: solid #212529 20px;">
                 <th scope="col">Broj stola</th>
@@ -63,52 +78,7 @@
             </tr>
         </thead>
 
-        <tbody>
-            {% for order in orders %}
-
-            <tr align="center" style="align-items: center">
-                <span class='order-status' style="display:none" value="{{order.id}}">{{order.status}}</span>
-                <td>{{ order.table_number }}</td>
-                <td class='order-status-text'>{{ order.status_text }}</td>
-                <td>{{ order.time_ordered }}</td>
-                <td>{{ order.price_together }} KM</td>
-
-                <td><button type="button" value="{{order.id}}" id="btn-reject-{{order.id}}" class="btn btn-outline-danger btn-sm btn-reject">Odbij</button></td>
-                <td><button type="button" value="{{order.id}}" id="btn-accept-{{order.id}}" class="btn btn-outline-success btn-sm btn-accept">Prihvati</button></td>
-                <td><button type="button" value="{{order.id}}" id="btn-ready-{{order.id}}" class="btn btn-outline-primary btn-sm btn-ready">Narudžba
-                        gotova</button></td>
-                <td><button type="button" value="{{order.id}}" data-toggle="collapse" data-target=".collapse-{{ order.id }}"
-                        class="btn btn-outline-info btn-sm">Detalji</button></td>
-            </tr>
-
-            <div class="colapsed_class">
-
-                <tr align="center" class="collapse collapse-{{ order.id }}" style="background:#212529">
-                    <th scope="col" style="color: white">&nbsp;</td>
-                    <th scope="col"><b>Naziv</b></td>
-                    <th scope="col"><b>Prilozi</b></td>
-                    <th scope="col"><b>Cijena</b></td>
-                    <th scope="col"><b>Količina</b></td>
-                    <th scope="col"><b>Napomena</b></td>
-                    <th scope="col">&nbsp;</td>
-                    <th scope="col">&nbsp;</th>
-                </tr>
-                {% for dish in order.details %}
-                <tr align="center" class="collapse collapse-{{ order.id }}">
-                    <td>&nbsp;</td>
-                    <td> {{ dish.name }}</td>
-                    <td>{{dish.additions}}</td>
-                    <td> {{ dish.price }} KM</td>
-                    <td> {{ dish.quantity }} </td>
-                    <td> {{ dish.note }} </td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                </tr>
-                {% endfor %}
-
-            </div>
-
-            {% endfor %}
+        <tbody class='orders-content'>
         </tbody>
 
     </table>

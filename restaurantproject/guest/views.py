@@ -5,7 +5,7 @@ from django.http import JsonResponse
 import logging
 import requests
 import os
-from base.models import MeniStavka, Sastojak, SastojakMeniStavka, Narudzba, NarudzbaStavka, GrupaOpcija, Opcija, OpcijaSastojak, NarudzbaStavkaOdabraneOpcije
+from base.models import MeniStavka, Sastojak, SastojakMeniStavka, Narudzba, NarudzbaStavka, GrupaOpcija, Opcija, OpcijaSastojak, NarudzbaStavkaOdabraneOpcije, Stol, Konobar
 from base.common.orders import ORDER_STATUSES
 # Create your views here.
 
@@ -36,13 +36,13 @@ dishes = [
 
 recommended_dishes = [
     {
-        'img_url': 'img/slider1.jpg',
+        'img_url': 'img/dupli_cizburger.jpg',
         'name': 'Dupli čizburger',
         'description': 'Ako ste voljeli običan ili onaj dupli, sigurni smo da ćete uživati u ovoj senzaciji. Dupli čizburger ima dva komada 100% čiste govedine začinjene samo mrvicom soli i paprikom. Dostupan je sa gorkim krastavcima, seckanim lukom, kečapom, senfom i dva parčeta američkog sira. Ne sadrži veštačke ukuse, konzervanse ili dodate boje iz veštačkih izvora.',
         'price': 8
     },
     {
-        'img_url': 'img/slider1.jpg',
+        'img_url': 'img/cizburger.jpg',
         'name': 'Čizburger',
         'description': 'Čizburger ima komad 100% čiste govedine začinjene samo mrvicom soli i paprikom. Dostupan je sa gorkim krastavcima, seckanim lukom, kečapom, senfom i parčetom američkog sira. Ne sadrži veštačke ukuse, konzervanse ili dodate boje iz veštačkih izvora.',
         'price': 8
@@ -57,24 +57,29 @@ recommended_dishes = [
 
 staff = [
     {
-        'name': 'Ethel Davis',
-        'job_description': 'Glavni kuvar',
-        'profile_pic': 'img/t1.jpg'
+        'name': 'Aleksije Mićić',
+        'job_description': 'Backend developer',
+        'profile_pic': 'img/aleksije.jpg'
     },
     {
-        'name': 'Rodney Cooper',
-        'job_description': 'Glavni konobar',
-        'profile_pic': 'img/t2.jpg'
+        'name': 'Nedeljko Milinković',
+        'job_description': 'Backend developer',
+        'profile_pic': 'img/nedeljko.jpg'
     },
     {
-        'name': 'Dora Walker',
-        'job_description': 'Šanker',
-        'profile_pic': 'img/t3.jpg'
+        'name': 'Debeljak Savo',
+        'job_description': 'Frontend developer',
+        'profile_pic': 'img/savo.png'
     },
     {
-        'name': 'Lena Keller',
-        'job_description': 'Pomoćni kuvar',
+        'name': 'Stefan Novaković',
+        'job_description': 'Backend developer',
         'profile_pic': 'img/t4.jpg'
+    },
+    {
+        'name': 'Darko Lekić',
+        'job_description': 'Backend developer',
+        'profile_pic': 'img/darko.jpg'
     }
 ]
 
@@ -129,10 +134,34 @@ recommended_drinks = [
         'price': 8
     }
 ]
+
+promotions_list = [
+    {
+        'img_url': 'https://d2gg9evh47fn9z.cloudfront.net/800px_COLOURBOX12831922.jpg',
+        'name': 'Mexicana Četvrtak',
+        'description': 'Dođite svaki četvrtak od 9:30 ujutro do 23:00 naveče i okusite čari meksičke kuhinje. Jela pripremljena na tradicionalni meksički način uz zvukove fieste. Ne može autentičnije bez da odete u Meksiko, tako da dođite na zabavu, veselje i prije svega tortilje.',
+        'promotion_time': 'Svaki četvrtak od 9:30 do 23:30' 
+    }, 
+    {
+        'img_url': 'https://promolover.com/media/Happy-Hour-Artwork-TRL.png',
+        'name': 'Happy Hour',
+        'description': 'Svaki radni dan od 16:00 do 21:00 dođite i popijte 2 piva za cijenu jednog. Uz odlične ponude kraft i stranog piva, imate ogroman izbor hrane i grickalica. Zasigurno, ovo je ponuda koja se ne propušta?',
+        'promotion_time': 'Svaki radni dan od 16:00 do 21:00' 
+    }, 
+    {
+        'img_url': 'https://s3.amazonaws.com/export.easil.com/b733c41f-8657-4f81-928b-8ac6a7a04b43/chicken-wings-poster-2016-10-15-21-09-26.jpg',
+        'name': 'NBA Basketball Night',
+        'description': 'Svakog petka od 20:15 do 23:30 dođite i uživajte uz najbolju košarku i najbolja pileća krilca na svijetu. Podržite svoj omiljeni tim uz opuštenu atmosferu i ljuta krilca. Uz takvu ponudu, ko još može odbiti?',
+        'promotion_time': 'Svaki petak 20:15 do 23:30 (dok traje sezona)' 
+    }
+]
+
 from django.middleware.csrf import get_token
 def home(request):
     # TODO: Come up with a better solution.
     # Force-get the CSRF token
+    stolovi = Stol.objects.all()
+
     csrf_token = get_token(request)
     context = {
         'base_props': base_props,
@@ -141,7 +170,8 @@ def home(request):
         'staff': staff,
         'impressions': impressions,
         'recommended_drinks': recommended_drinks,
-        'is_main_page': True
+        'is_main_page': True,
+        'table_numbers': [stol.brojStola for stol in stolovi]
     }
     return render(request, 'guest/home.html', context)
 
@@ -180,25 +210,42 @@ def menu(request):
     # Force-get the CSRF token
     csrf_token = get_token(request)
     meniStavke_temp = MeniStavka.objects.all()
+    stolovi = Stol.objects.all()
 
     # meniStavka['Dorucak'] = ['dorucak1', 'dorucak2'...]
-    meniStavke = {}
+    meniStavkePoKategoriji = {}
 
     for meniStavka in meniStavke_temp:
         # Dodaj spisak sastojaka na meniStavka da se na osnovu njega moze popuniti lista sastojaka pri prikazu.
         meniStavka.sastojci = ''.join([s.sastojak.naziv + ' ' + str(s.kolicina) + "," for s in meniStavka.sastojakmenistavka_set.all()])
-        
-        naziv = meniStavka.meniStavkaKategorija.naziv
-        if meniStavka.meniStavkaKategorija.naziv in meniStavke:
-            meniStavke[naziv].append(meniStavka)
+
+        kategorija = meniStavka.meniStavkaKategorija
+        if meniStavka.meniStavkaKategorija in meniStavkePoKategoriji:
+            meniStavkePoKategoriji[kategorija].append(meniStavka)
+            meniStavkePoKategoriji[kategorija] = sorted(meniStavkePoKategoriji[kategorija], key=lambda e : e.redniBroj)
         else:
-            meniStavke[naziv] = [meniStavka]
+            meniStavkePoKategoriji[kategorija] = [meniStavka]
+
+    class CategoryMenuItemsPair:
+        def __init__(self, category, menuItemsArray):
+                self.category = category
+                self.menuItemsArray = menuItemsArray
+
+    sortedCategories = sorted(meniStavkePoKategoriji, key = lambda e: e.redniBroj)
+    
+    # Will be a properly sorted array of these pairs.
+    # Used in populating the view with categories and menuItems, in the correct order.
+    categoryMenuItemsPairsArray = []
+    
+    for category in sortedCategories:
+        pair = CategoryMenuItemsPair(category, meniStavkePoKategoriji[category])
+        categoryMenuItemsPairsArray.append(pair)
 
     context = {
-        'meniStavke': meniStavke
+        'category_items_pairs_array': categoryMenuItemsPairsArray,
+        'table_numbers': [stol.brojStola for stol in stolovi]
     }
     return render(request, 'guest/menu.html', context)
-
 
 def add_order(request):
     from json import loads
@@ -207,45 +254,45 @@ def add_order(request):
         try:
             order_data = loads(order_data_json)
             narudzba = Narudzba()
-            
             narudzba.save()
-            for arr in order_data.values():
-                for rb, dict_elem in enumerate(arr):
-                    # jer nam ime ne treba pri inicijalizaciji
-                    naziv = dict_elem.pop('name', None)
-                    narudzba.pushEndpoint = dict_elem.pop('pushEndpoint')
-                    narudzba.save()
-                    # TODO: Pozeljno je da se na front-end popravi da JSON bude u skladu sa odgovarajucim modelom, pa ovo ne mora da se radi (jer je dupli posao)
-                    dict_elem['cijenaBezOpcija'] = dict_elem.pop('price')
-                    dict_elem['napomena'] = dict_elem.pop('note')
-                    dict_elem['kolicina'] = dict_elem.pop('amount')
-                    dict_elem['redniBroj'] = rb + 1
-                    dict_elem['napomena'] = dict_elem['napomena'] if 'napomena' in dict_elem else ' '
-                    dict_elem.pop('id', None)
-                    optionGroups = dict_elem.pop('options')
+            orderItems = order_data["orderItems"]
+            tableNumber = order_data["tableNumber"]
+            narudzba.stol = tableNumber
+            for itemNo, orderItem in enumerate(orderItems):
+                # jer nam ime ne treba pri inicijalizaciji
+                naziv = orderItem.pop('name', None)
+                narudzba.pushEndpoint = orderItem.pop('pushEndpoint')
+                narudzba.save()
+                # TODO: Pozeljno je da se na front-end popravi da JSON bude u skladu sa odgovarajucim modelom, pa ovo ne mora da se radi (jer je dupli posao)
+                orderItem['cijenaBezOpcija'] = orderItem.pop('price')
+                orderItem['napomena'] = orderItem.pop('note')
+                orderItem['kolicina'] = orderItem.pop('amount')
+                orderItem['redniBroj'] = itemNo + 1
+                orderItem['napomena'] = orderItem['napomena'] if 'napomena' in orderItem else ' '
+                orderItem.pop('id', None)
+                optionGroups = orderItem.pop('options')
 
-                    # morao sam preimenovati da bih ovo mogao uraditi
-                    narudzbaStavka = NarudzbaStavka(**dict_elem)
-                    narudzbaStavka.narudzba = narudzba
-                    narudzbaStavka.meniStavka = MeniStavka.objects.filter(
-                        naziv=naziv).first()
-                    narudzbaStavka.save()
+                # morao sam preimenovati da bih ovo mogao uraditi
+                narudzbaStavka = NarudzbaStavka(**orderItem)
+                narudzbaStavka.narudzba = narudzba
+                narudzbaStavka.meniStavka = MeniStavka.objects.filter(
+                    naziv=naziv).first()
+                narudzbaStavka.save()
 
-                    for optG in optionGroups['groups']:
-                        for selected in optG['selected']:
-                            stavkaOpcija = NarudzbaStavkaOdabraneOpcije()
-                            stavkaOpcija.naziv = selected['name']
-                            stavkaOpcija.cijena = selected['price']
-                            stavkaOpcija.opcija = Opcija.objects.get(
-                                id=selected['id'])
-                            stavkaOpcija.narudzbaStavka = narudzbaStavka
-                            stavkaOpcija.save()
+                for optG in optionGroups['groups']:
+                    for selected in optG['selected']:
+                        stavkaOpcija = NarudzbaStavkaOdabraneOpcije()
+                        stavkaOpcija.naziv = selected['name']
+                        stavkaOpcija.cijena = selected['price']
+                        stavkaOpcija.opcija = Opcija.objects.get(
+                            id=selected['id'])
+                        stavkaOpcija.narudzbaStavka = narudzbaStavka
+                        stavkaOpcija.save()
 
             return JsonResponse({'success': True, 'order': {'id': narudzba.id}})
         except (ValueError, TypeError) as e:
             logging.error(e)
             return JsonResponse({'success': False, 'error': str(e)})
-
 
 def order(request, order_id):
     from json import loads
@@ -337,3 +384,31 @@ def localforage(req):
     response = HttpResponse(content=test_file)
     response['Content-Type'] = 'application/javascript'
     return response
+
+
+def promotions(request):
+    context = {
+        'promotions': promotions_list
+    }
+    return render(request, 'guest/promotions.html', context=context)
+
+def call_bartender(request):
+    from json import loads
+    from random import randint
+
+    if request.method == "POST":
+        data = loads(request.body)
+        table_number = data["tableNumber"]
+        try:
+            table = Stol.objects.filter(brojStola=table_number)[0]
+            konobari = Konobar.objects.filter(brojSekcije=table.brojSekcije)
+            koji_k = konobari[randint(0,len(konobari))]
+        except Exception as e:
+            return HttpResponse(content=None)
+    return HttpResponse(content=None)
+        
+def logout_view(request):
+    from django.contrib.auth import logout
+    from django.shortcuts import redirect
+    logout(request)
+    return redirect('/')

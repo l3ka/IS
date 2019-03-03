@@ -1,0 +1,53 @@
+{% extends 'guest/base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+
+<section class="related-area section-gap" id="promotions">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="menu-content pb-60 col-lg-8">
+                <div class="title text-center">
+                    <h1 class="mb-10">Promocije</h1>
+                    <p>Razne promocije jela, pića i događaja koje možete očekivati u našem restoranu</p>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="active-realated-carusel">
+                {% for promotion in promotions %}
+                    <div class="item row align-items-center">
+                        <div class="col-lg-6 rel-left">
+                            <h3>
+                                {{ promotion.name }}
+                            </h3>
+                            <p class="pt-40 pb-40">
+                                {{ promotion.description }}
+                            </p>
+                            <p class="pt-30 pb-30">
+                                Trajanje promocije: {{ promotion.promotion_time }}
+                            </p>
+                        </div>
+                        <div class="col-lg-6">
+                            <img class="img-fluid" src="{{promotion.img_url}}" alt="">
+                            <!-- style="width:555px; height:400px" -->
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

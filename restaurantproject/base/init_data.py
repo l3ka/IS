@@ -50,6 +50,12 @@ def addKonobari():
             username=username, password=password)
         Konobar.objects.create(
             ime=ime, prezime=prezime, brojSekcije=brojSekcije, jeSefSmjene=jeSefSmjene, user=tempUser)
+        group = Group.objects.get(name='Konobari')
+        tempUser.groups.add(group)
+
+        if jeSefSmjene:
+            group = Group.objects.get(name='Šankeri')
+            tempUser.groups.add(group)
 
 
 # Ime, Prezime, nalog, lozinka
@@ -67,6 +73,8 @@ def addMenadzeri():
         tempUser = User.objects.create_user(
             username=username, password=password)
         Menadzer.objects.create(ime=ime, prezime=prezime, user=tempUser)
+        group = Group.objects.get(name='Menadžeri')
+        tempUser.groups.add(group)
 
 
 # MeniStavkaKategorija
@@ -221,7 +229,7 @@ def addMeniStavke():
         naziv="Čizburger",
         opis="Čizburger ima komad 100% čiste govedine začinjene samo mrvicom soli i paprikom. Dostupan je sa gorkim krastavcima, seckanim lukom, kečapom, senfom i parčetom američkog sira. Ne sadrži veštačke ukuse, konzervanse ili dodate boje iz veštačkih izvora.",
         cijena=4.00,
-        url="https://i.imgur.com/MNEX5BB.jpg",
+        url="https://usateatsiptrip.files.wordpress.com/2018/08/gettyimages-589115286.jpg?w=1024&h=615&crop=1",
         nijeUPonudi=False,
         meniStavkaKategorija=MeniStavkaKategorija.objects.filter(naziv='Ručak').first()
     )
@@ -370,9 +378,9 @@ def addMeniStavkaTag():
 
 
 def addStolovi():
-    for brojSekcije in range(1, 4):
-        for brojStola in range(1, 7):
-            Stol.objects.create(brojStola=brojStola, brojSekcije=brojSekcije)
+    for brojSekcije in range(3):
+        for k in range(1,7):
+            Stol.objects.create(brojStola=brojSekcije*6 + k, brojSekcije=brojSekcije + 1)
 
 
 # Upustvo:

@@ -62,13 +62,12 @@
                 $(modal.find('#item-ingredients')).show();
                 modal.find('#item-ingredients-text').val(ingredients.replace(/,/g, '\n'))
             }
-            modal.find('#badge-price').text(price + 'KM')
+            modal.find('#badge-price').text((+price).toFixed(2) + 'KM')
         })
 
         // Hide the Modal
         // TODO: @Nedeljko, ovaj kod ne radi nis :?
         $("#add-button").click(function(){
-            console.log('test');
             $("#modal-menu").modal("hide");
         });
     })
@@ -100,13 +99,30 @@
 
                         </ul>
                     </div>
-                    <h3><span class="badge badge-dark" id="badge-price" style="float:right">100KM</span></h3>
+                    <h3><span class="badge badge-dark" id="badge-price" style="float:right"></span></h3>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" id="close-button">Zatvori</button>
-                <!-- TODO: @Nedeljko: Jel dobro ovo zatvarati sa data-dismis?? -->
-                <button type="button" class="btn btn-danger" id="add-button" data-dismiss="modal">Dodaj u narudžbu</button>
+            <div class="modal-footer" id="menu-item-footer">
+                <table class="ml-0 mr-0" id="menu-item-table">
+                    <tr>
+                        <td>
+                            <div id="add-item-success" class="alert alert-success" style="display:none" role="alert">
+                                Stavka uspješno dodata
+                            </div>
+                        </td>
+                        <td style="width: 40px">&nbsp;</td>
+                        <td>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" id="close-button">Zatvori</button>
+                            <!-- TODO: @Nedeljko: Jel dobro ovo zatvarati sa data-dismis?? -->
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger" id="add-button">Dodaj u narudžbu</button>
+                        </td>
+                    </tr>
+                    <tr id="add-item-success-row" style="display: none">
+                        
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
@@ -115,16 +131,16 @@
 <!-- Start top-dish Area -->
 <section class="top-dish-area section-gap" id="dish">
     <div class="container">
-            {% for key, value_list in meniStavke.items %}
+            {% for category_items_pair in category_items_pairs_array %}
             <div class="row d-flex justify-content-center">
                 <div class="menu-content pb-60 col-lg-8">
                     <div class="title text-center">
-                        <h1 class="mb-10">{{key}}</h1>
+                        <h1 class="mb-10">{{category_items_pair.category.naziv}}</h1>
                     </div>
                 </div>
             </div>
             <div class="row">
-                {% for value in value_list %}
+                {% for value in category_items_pair.menuItemsArray %}
                     <div class="single-dish col-lg-4">
                         <div class="thumb">
                             <img class="img-fluid" data-toggle="modal" data-target="#modal-menu" data-description="{{ value.opis }}"

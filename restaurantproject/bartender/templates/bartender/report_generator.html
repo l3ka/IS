@@ -1,0 +1,14 @@
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <form action="/bartender/reports/" method="post" id="config-form" name="config-form">
+                {% csrf_token %}
+                <label for="dateFrom">Datum od:</label><input type="date" name="dateFrom" id="dateFrom"> <br>
+                <label for="dateTo">Datum do:</label><input type="date" name="dateTo" id="dateTo"> <br>
+                <input type="submit" id="submit" name="submit" value="Pokreni">
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% block content %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+
+<!-- TODO: Ovo je potrebno centrirati, pisano je originalno u BulmaCSS, ali sad je na tebi red da sam napravis, @Neko -->
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column" id="cijena_ts"></div>
+            <div class="column" id="cijena_ts_date"></div>
+            <div class="column" id="bar"></div>
+            <div class="column" id="pie"></div>
+            <div class="column" id="profit"></div>
+        </div>
+    </div>
+</section>
+<script>
+    let cijena_ts = {{ cijena_ts | safe }};
+    let cijena_ts_date = {{ cijena_ts_date | safe }};
+    let bar = {{ bar | safe }};
+    let pie = {{ pie | safe }};
+    let profit = {{ profit | safe }};
+
+    Plotly.newPlot('cijena_ts', cijena_ts);
+    Plotly.newPlot('cijena_ts_date', cijena_ts_date);
+    Plotly.newPlot('bar', bar);
+    Plotly.newPlot('pie', pie);
+    Plotly.newPlot('profit', profit);
+</script>
+{% endblock %}
