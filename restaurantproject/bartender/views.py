@@ -8,7 +8,6 @@ from dateutil import parser
 from base.models import MeniStavka, Sastojak, SastojakMeniStavka, Narudzba, NarudzbaStavka, NarudzbaStavkaOdabraneOpcije
 from base.common.orders import ORDER_STATUSES
 from decimal import Decimal
-from . import graphing_util
 
 def get_orders(time_ordered=None):
     orders = []
@@ -26,8 +25,9 @@ def get_orders(time_ordered=None):
         price = Decimal(0)
         for i in items:
             # total_item_price je sad redudantno
+            # TODO: Za cijenu bez opcija se na front-endu postavlja cijena sa opcijama.
             total_item_price = i.cijenaBezOpcija # @Nedeljko: iz nekog razloga mi smo kao cijenuBezOpcija slali ukupnu cijenu lol
-            price += total_item_price
+            price += total_item_price * i.kolicina
             prilozi = list(NarudzbaStavkaOdabraneOpcije.objects.filter(narudzbaStavka=i.id))
             items_mapped.append({
                 'img_url': i.meniStavka.fotografija,
@@ -67,7 +67,7 @@ def orders(request):
     
     try:
         t = int(request.GET['t'])/1000 + 1 if 't' in request.GET else None
-        time_ordered =datetime.datetime.fromtimestamp(t)
+        time_ordered = datetime.datetime.fromtimestamp(t)
     except Exception as ex:
         time_ordered = None
 
@@ -87,45 +87,3 @@ def login(request):
 
 def is_member(user, group):
     return user.groups.filter(name = group).exists()
-
-def generate_report(request):
-    return render(request,
-        'bartender/report_generator.html'
-        )
-    # if is_member(request.user, 'Menadžeri'):
-
-    # else:
-    #     return redirect('/') # TODO: Skontati gdje treba redirect @Stefan
-
-# TODO: @Stefan, po potrebi premjestiti u poseban app za menadzere i samo njima dozvoliti da gledaju        !
-def reports(request):
-    if is_member(request.user, 'Menadžeri') and request.method == 'POST':
-        dateFrom = request.POST.get('dateFrom', '')
-        dateTo = request.POST.get('dateTo', '')
-        # X - naziv kategorije, Y - ukupna prodaja
-        counts = []
-        labels = []
-
-        from base.models import MeniStavkaKategorija
-        kategorije = MeniStavkaKategorija.objects.all()
-        for kategorija in kategorije:
-            from base.models import NarudzbaStavka
-            from django.db.models import Sum
-            stavke = NarudzbaStavka.objects.filter(meniStavka__meniStavkaKategorija = kategorija)
-            suma = sum(stavka.cijenaSaOpcijama for stavka in stavke)
-            if suma != 0:
-                labels.append(kategorija.naziv)
-                counts.append(suma)
-
-        # counts = [10, 15, 30, 40, 33, 141, 20, 15]
-        # labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
-        pie = graphing_util.plot_pie(counts, labels)
-        bar = graphing_util.plot_bar(counts, labels)
-        return render(request,
-                'bartender/graphs.html',
-                {
-                    'pie' : pie,
-                    'bar' : bar,
-                })
-    else:
-        return redirect('/') # TODO: Skontati gdje treba redirect @Stefan

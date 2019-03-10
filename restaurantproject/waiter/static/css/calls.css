@@ -1,0 +1,17 @@
+#table-calls {
+    width: auto;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+#table-calls tr {
+    border-bottom: 1pt solid black;
+}
+
+#table-calls th {
+    padding: 5px;
+}
+
+#table-calls td {
+    padding: 5px;
+}

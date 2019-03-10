@@ -1,0 +1,29 @@
+Za pokretanje web server-a, potrebno je instalirati:
+
+- Python 3.7.2
+- Sve module navedene u requirements.txt fajlu u root folderu projekta
+- PostgreSQL 11.2
+
+Nakon toga, treba kreirati praznu šemu baze podataka (koristeći npr. pgAdmin 4), i podesiti odgovarajuća konekcioni parametre u fajlu
+restaurantproject\restaurantproject\settings.py
+
+Podešavanja su enkapsulirana u DATABASES varijabli, kao na sledećem primjeru:
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'yummy',
+        'USER': 'yummy_user',
+        'PASSWORD': 'restoran',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+}
+
+Nakon toga, treba izvršiti sljedeće komande u root folderu projekta:
+
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver 0.0.0.0:8000
+
+Nakon toga je moguće pristupiti web stranici. Za lokalni pristup je podrazumijevana adresa: http://127.0.0.1:8000/

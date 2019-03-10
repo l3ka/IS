@@ -402,6 +402,11 @@ def call_bartender(request):
         try:
             table = Stol.objects.filter(brojStola=table_number)[0]
             konobari = Konobar.objects.filter(brojSekcije=table.brojSekcije)
+            from base.models import Poziv
+            poziv = Poziv()
+            poziv.brojStola = table.brojStola
+            poziv.brojSekcije = table.brojSekcije
+            poziv.save()
             koji_k = konobari[randint(0,len(konobari))]
         except Exception as e:
             return HttpResponse(content=None)

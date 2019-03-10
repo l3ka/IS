@@ -21,7 +21,7 @@ $(document).ready(function () {
         $('#call-bartender-table').val(tableNumber);
     });
     $('#call-bartender-button').click(e => {
-        const tableNumber = +$('#table-number-select').val();
+        const tableNumber = +$('#call-bartender-table').val();
         if (!tableNumber) {
             return;
         }
@@ -272,13 +272,13 @@ $(document).ready(function () {
                     if (Number.isNaN(orderId)) {
                         throw new Error('Invalid order ID');
                     }
+
+                    // If browser supports Service Workers (due to Notification support), allow customer to be notified.
                     if ('serviceWorker' in navigator) {
                         navigator.serviceWorker.register('/sw.js');
-                    } else {
-                        // TODO: Handle this unfortunate situation.
+                        navigator.serviceWorker.controller.postMessage(response.order.id);
                     }
 
-                    navigator.serviceWorker.controller.postMessage(response.order.id);
                     orderItems.id = orderId;
                     orderItems.status = orderStatuses.AWAITING_PROCESSING.ID;
 
@@ -467,7 +467,7 @@ function updateMenuItemAmount(operation, menuItemId) {
             } else {
                 orders[i].amount = parseInt(orders[i].amount) - 1;
                 $('#input-menu-item-order-' + menuItemId).val(orders[i].amount);
-                let priceSum = orders.reduce((a, b) => +a + +b.price * (+b.amount), 0);
+                let priceSum = orders.reduce((sum, order) => sum + (+order.price * (+order.amount)), 0);
                 if (priceSum == '0') {
                     $('#badge-price').hide();
                 } else {
@@ -482,7 +482,8 @@ function updateMenuItemAmount(operation, menuItemId) {
             } else {
                 orders[i].amount = parseInt(orders[i].amount) + 1;
                 $('#input-menu-item-order-' + menuItemId).val(orders[i].amount);
-                let priceSum = orders.reduce((a, b) => +a + +b.price * (+b.amount), 0);
+                console.log(orders);
+                let priceSum = orders.reduce((sum, order) => sum + (+order.price * (+order.amount)), 0);
                 if (priceSum == '0') {
                     $('#badge-price').hide();
                 } else {

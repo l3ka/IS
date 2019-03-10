@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'guest.apps.GuestConfig',
     'bartender.apps.BartenderConfig',
     'reports.apps.ReportsConfig',
+    'staff.apps.StaffConfig',
+    'waiter.apps.WaiterConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -156,5 +158,5 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # TODO: Ne bi trebalo vaziti za sve pristupe?
-LOGIN_REDIRECT_URL = 'bartender-orders'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'

@@ -1,0 +1,21 @@
+{% extends 'staff/base.html' %}
+
+{% load static %}
+
+{% block content %}
+<!-- start banner Area -->
+<section class="banner-area relative" id="home">
+    <div class="container">
+        <div class="row fullscreen d-flex align-items-center justify-content-start">
+            <div class="banner-content col-lg-8 col-md-12">
+                <h4 class="text-white text-uppercase"></h4>
+                <h1></h1>
+                <p class="text-white"></p>
+                <a href="{% url 'guest-menu' %}" class="primary-btn header-btn text-uppercase"></a>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End banner Area -->
+
+{% endblock content %}

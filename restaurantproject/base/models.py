@@ -5,6 +5,11 @@ from django.core.files import File
 import urllib.request
 import os
 
+class Poziv(models.Model):
+    brojStola = models.IntegerField()
+    brojSekcije = models.IntegerField()
+    vrijemeKreiranja = models.DateTimeField(default=timezone.now)
+
 class Dogadjaj(models.Model):
     naziv = models.CharField(max_length = 20, help_text = 'Unesite naziv događaja')
     opis = models.TextField()

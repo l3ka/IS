@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pozivi</title>
+    <link rel="stylesheet" href="{% static 'css/calls.css' %}" />
+</head>
+
+<body>
+    <table id="table-calls">
+        <tr>
+            <th>Broj sekcije</th>
+            <th>Broj stola</th>
+            <th>Vrijeme</th>
+        </tr>
+    </table>
+    <!-- HACK: Hidden button for triggering vibrations -->
+    <button id='nodisplay-button-vibration' style='display: none' onclick='vibrate()'></button>
+    <p id='log'>
+    
+    </p>
+    <script src="{% static 'js/waiter.js' %}" defer></script>
+</body>
+
+</html>

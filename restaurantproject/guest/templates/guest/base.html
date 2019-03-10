@@ -194,9 +194,10 @@
                         <li><a href="#impressions">Dojmovi</a></li>
                         <li><a href="{% url 'guest-promotions' %}">Promocije</a></li>
                         {% endif %}
-                        <li><a href="#contact">Kontaktne informacije</a></li>
+                        <li><a href="#contact">Kontakt</a></li>
                         <li><a data-toggle="modal" data-target="#modal-call-bartender">Zovni konobara</a></li>
                         {% if user.is_authenticated %}
+                            <li><a href="/staff">Za osoblje</a></li>
                             <li><a href="{% url 'logout' %} ">Odjava</a></li>
                         {% else %}
                             <li><a href="{% url 'bartender-login' %}">Prijava</a></li>
@@ -234,7 +235,7 @@
                 </div>
                 <div class="col-lg-4  col-md-6 col-sm-6">
                     <div class="single-footer-widget">
-                        <h4 class="text-white">Kontaktne informacije</h4>
+                        <h4 class="text-white">Kontakt</h4>
                         <p>
                             Ako imate i želite nešto lično da nam javite, učinite to na neki od telefonskih brojeva
                             navedenih ispod.

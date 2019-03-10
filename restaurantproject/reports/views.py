@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.http import HttpResponse
 
 from . import graphing_util
@@ -46,5 +47,50 @@ def report(request):
             'profit': category_profit_bar,
             'cijena_ts_date' : cijena_ts_date,
         })
+    else:
+        return redirect('/') # TODO: Skontati gdje treba redirect @Stefan
+
+def generate_report(request):
+    return render(request,
+        'bartender/report_generator.html'
+        )
+    # if is_member(request.user, 'Menadžeri'):
+
+    # else:
+    #     return redirect('/') # TODO: Skontati gdje treba redirect @Stefan
+
+def is_member(user, group):
+    return user.groups.filter(name = group).exists()
+
+# TODO: @Stefan, po potrebi premjestiti u poseban app za menadzere i samo njima dozvoliti da gledaju        !
+def reports_old(request):
+    if is_member(request.user, 'Menadžeri') and request.method == 'POST':
+        dateFrom = request.POST.get('dateFrom', '')
+        dateTo = request.POST.get('dateTo', '')
+        # X - naziv kategorije, Y - ukupna prodaja
+        counts = []
+        labels = []
+
+        from base.models import MeniStavkaKategorija
+        kategorije = MeniStavkaKategorija.objects.all()
+        for kategorija in kategorije:
+            from base.models import NarudzbaStavka
+            from django.db.models import Sum
+            stavke = NarudzbaStavka.objects.filter(meniStavka__meniStavkaKategorija = kategorija)
+            suma = sum(stavka.cijenaSaOpcijama for stavka in stavke)
+            if suma != 0:
+                labels.append(kategorija.naziv)
+                counts.append(suma)
+
+        # counts = [10, 15, 30, 40, 33, 141, 20, 15]
+        # labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+        pie = graphing_util.plot_pie(counts, labels)
+        bar = graphing_util.plot_bar(counts, labels)
+        return render(request,
+                'bartender/graphs.html',
+                {
+                    'pie' : pie,
+                    'bar' : bar,
+                })
     else:
         return redirect('/') # TODO: Skontati gdje treba redirect @Stefan
